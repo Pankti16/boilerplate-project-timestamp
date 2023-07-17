@@ -18,10 +18,37 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+//Take date and return the object with unix and utc format of it
+const getFormatDate = (date = new Date()) => {
+  const newDate = new Date(date);
+  const utc = newDate.toUTCString();
+  const unix = newDate.valueOf();
+  return {unix,utc};
+};
 
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+//If forgets to pass the date then show the output for current date
+app.get("/api/", function (req, res) {
+  res.json(getFormatDate());
+});
+
+//Show output for the requested date
+app.get("/api/:date", function (req, res) {
+  //Save request date in a variable
+  let tempDate = req.params.date;
+  //Create regex for checking if it is a timestamp
+  const myRegEx = new RegExp(/\d{5,}/);
+  //If it is a timestamp and not a date string then parse it before creating date from it
+  if (myRegEx.test(tempDate)) {
+    tempDate = parseInt(tempDate);
+  }
+  //Form date from request date
+  const newDate = new Date(tempDate);
+  //If date is not valid then return error with empty values
+  if (newDate.toString() == "Invalid Date") {
+    res.json({unix: "",utc: "", error: "Invalid Date"});
+  }
+  //Return the output from the data
+  res.json(getFormatDate(newDate));
 });
 
 
